@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="33e4ae9e-632a-4866-a4b7-915db78503b2" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/schegolevalex/testTasks/AnylogicTickets.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/schegolevalex/testTasks/AnylogicTickets.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -90,7 +91,7 @@
       <option name="presentableId" value="Default" />
       <updated>1682581636339</updated>
       <workItem from="1682581637596" duration="7949000" />
-      <workItem from="1682771649111" duration="11868000" />
+      <workItem from="1682771649111" duration="14665000" />
     </task>
     <servers />
   </component>

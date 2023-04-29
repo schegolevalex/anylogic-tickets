@@ -1,12 +1,12 @@
 package com.schegolevalex.testTasks;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,52 +16,65 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 
-/**
- * Hello world!
- */
 public class AnylogicTickets {
 
-    @SneakyThrows
     public static void main(String[] args) {
         String filePath = "src/main/resources/tickets.json";
-        StringBuilder json = getJsonStringFromFilePath(filePath);
-
-        ObjectMapper mapper = getObjectMapper();
-        JsonNode jsonNode = mapper.readTree(json.toString());
-        JsonNode ticketsNode = jsonNode.get("tickets");
-        Ticket[] tickets = mapper.readValue(ticketsNode.toString(), new TypeReference<>() {
-        });
-
         String cityFrom = "Владивосток";
         String cityTo = "Тель-Авив";
+
+        StringBuilder json = getJsonStringFromFilePath(filePath);
+        ObjectMapper mapper = getObjectMapper();
+        JsonNode jsonNode;
+        List<Ticket> tickets;
+        try {
+            jsonNode = mapper.readTree(json.toString());
+            JsonNode ticketsNode = jsonNode.get("tickets");
+            tickets = mapper.readValue(ticketsNode.toString(), new TypeReference<>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         long seconds = getAverageFlyTime(tickets, cityFrom, cityTo).toSeconds();
+        System.out.printf("Среднее время полета между городом %s и городом %s составляет %d:%02d:%02d%n"
+                , cityFrom, cityTo, seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
 
-        System.out.printf("Среднее время полета между городом %s и городом %s составляет %d:%02d:%02d%n", cityFrom, cityTo, seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
-
-        System.out.println(get90Percentile(tickets));
+        long percentile90 = get90Percentile(tickets, cityFrom, cityTo).toSeconds();
+        System.out.printf("90-й процентиль времени полета между городом %s и городом %s составляет %d:%02d:%02d%n"
+                , cityFrom, cityTo, percentile90 / 3600, (percentile90 % 3600) / 60, (percentile90 % 60));
     }
 
-    private static Duration getAverageFlyTime(Ticket[] tickets, String originName, String destinationName) {
-        List<Ticket> filteredTicketList = Arrays.stream(tickets)
-                .filter(ticket -> ticket.getOriginName().equals(originName) && ticket.getDestinationName().equals(destinationName))
-                .toList();
+    private static Duration getAverageFlyTime(List<Ticket> tickets, String originName, String destinationName) {
+        List<Ticket> filteredTicketList = getFilteredTicketList(tickets, originName, destinationName);
+        List<Duration> durationsList = getDurationsList(filteredTicketList);
+        return durationsList.stream().reduce(Duration.ZERO, Duration::plus).dividedBy(durationsList.size());
+    }
 
-        List<Duration> durationsList = filteredTicketList.stream()
+    private static Duration get90Percentile(List<Ticket> tickets, String originName, String destinationName) {
+        List<Ticket> filteredTicketList = getFilteredTicketList(tickets, originName, destinationName);
+        List<Duration> durationsList = getDurationsList(filteredTicketList);
+        List<Duration> sortedDurationsList = durationsList.stream().sorted().toList();
+        double i = 0.9 * sortedDurationsList.size();
+        return sortedDurationsList.get((int) Math.ceil(i)-1);
+    }
+
+    private static List<Duration> getDurationsList(List<Ticket> filteredTicketList) {
+        return filteredTicketList.stream()
                 .map(ticket -> {
                     LocalDateTime localDateTimeDeparture = LocalDateTime.of(ticket.getDepartureDate(), ticket.getDepartureTime());
                     LocalDateTime localDateTimeArrival = LocalDateTime.of(ticket.getArrivalDate(), ticket.getArrivalTime());
                     return Duration.between(localDateTimeDeparture, localDateTimeArrival);
                 })
                 .toList();
-
-        return durationsList.stream().reduce(Duration.ZERO, Duration::plus).dividedBy(durationsList.size());
     }
 
-    private static LocalTime get90Percentile(Ticket[] tickets) {
-        return null;
+    private static List<Ticket> getFilteredTicketList(List<Ticket> tickets, String originName, String destinationName) {
+        return tickets.stream()
+                .filter(ticket -> ticket.getOriginName().equals(originName) && ticket.getDestinationName().equals(destinationName))
+                .toList();
     }
 
     private static StringBuilder getJsonStringFromFilePath(String filePath) {
