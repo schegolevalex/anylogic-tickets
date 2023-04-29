@@ -11,10 +11,13 @@ import lombok.SneakyThrows;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Hello world!
@@ -32,14 +35,27 @@ public class AnylogicTickets {
         Ticket[] tickets = mapper.readValue(ticketsNode.toString(), new TypeReference<>() {
         });
 
-        System.out.println(getAverageFlyTime(tickets));
+        long seconds = getAverageFlyTime(tickets, "Владивосток", "Тель-Авив").toSeconds();
+
+        System.out.printf("%d:%02d:%02d%n", seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
+
         System.out.println(get90Percentile(tickets));
     }
 
-    private static LocalTime getAverageFlyTime(Ticket[] tickets) {
+    private static Duration getAverageFlyTime(Ticket[] tickets, String originName, String destinationName) {
+        List<Ticket> filteredTicketList = Arrays.stream(tickets)
+                .filter(ticket -> ticket.getOriginName().equals(originName) && ticket.getDestinationName().equals(destinationName))
+                .toList();
 
-        Arrays.stream(tickets);
-        return null;
+        List<Duration> durationsList = filteredTicketList.stream()
+                .map(ticket -> {
+                    LocalDateTime localDateTimeDeparture = LocalDateTime.of(ticket.getDepartureDate(), ticket.getDepartureTime());
+                    LocalDateTime localDateTimeArrival = LocalDateTime.of(ticket.getArrivalDate(), ticket.getArrivalTime());
+                    return Duration.between(localDateTimeDeparture, localDateTimeArrival);
+                })
+                .toList();
+
+        return durationsList.stream().reduce(Duration.ZERO, Duration::plus).dividedBy(durationsList.size());
     }
 
     private static LocalTime get90Percentile(Ticket[] tickets) {
@@ -65,7 +81,6 @@ public class AnylogicTickets {
         ObjectMapper mapper = new ObjectMapper();
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern("dd.MM.yy")));
-        javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern("HH:mm")));
         javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern("H:mm")));
 
         mapper.registerModule(javaTimeModule);
