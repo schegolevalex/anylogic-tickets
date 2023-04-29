@@ -35,9 +35,11 @@ public class AnylogicTickets {
         Ticket[] tickets = mapper.readValue(ticketsNode.toString(), new TypeReference<>() {
         });
 
-        long seconds = getAverageFlyTime(tickets, "Владивосток", "Тель-Авив").toSeconds();
+        String cityFrom = "Владивосток";
+        String cityTo = "Тель-Авив";
+        long seconds = getAverageFlyTime(tickets, cityFrom, cityTo).toSeconds();
 
-        System.out.printf("%d:%02d:%02d%n", seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
+        System.out.printf("Среднее время полета между городом %s и городом %s составляет %d:%02d:%02d%n", cityFrom, cityTo, seconds / 3600, (seconds % 3600) / 60, (seconds % 60));
 
         System.out.println(get90Percentile(tickets));
     }
