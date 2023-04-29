@@ -23,10 +23,34 @@ public class AnylogicTickets {
 
     @SneakyThrows
     public static void main(String[] args) {
+        String filePath = "src/main/resources/tickets.json";
+        StringBuilder json = getJsonStringFromFilePath(filePath);
+
+        ObjectMapper mapper = getObjectMapper();
+        JsonNode jsonNode = mapper.readTree(json.toString());
+        JsonNode ticketsNode = jsonNode.get("tickets");
+        Ticket[] tickets = mapper.readValue(ticketsNode.toString(), new TypeReference<>() {
+        });
+
+        System.out.println(getAverageFlyTime(tickets));
+        System.out.println(get90Percentile(tickets));
+    }
+
+    private static LocalTime getAverageFlyTime(Ticket[] tickets) {
+
+        Arrays.stream(tickets);
+        return null;
+    }
+
+    private static LocalTime get90Percentile(Ticket[] tickets) {
+        return null;
+    }
+
+    private static StringBuilder getJsonStringFromFilePath(String filePath) {
         StringBuilder json = new StringBuilder();
         String line;
 
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/tickets.json"))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath))) {
             while ((line = bufferedReader.readLine()) != null) {
                 line = line.trim().replaceAll("\ufeff", "");
                 json.append(line);
@@ -34,7 +58,10 @@ public class AnylogicTickets {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return json;
+    }
 
+    private static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern("dd.MM.yy")));
@@ -42,14 +69,6 @@ public class AnylogicTickets {
         javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern("H:mm")));
 
         mapper.registerModule(javaTimeModule);
-
-        JsonNode jsonNode = mapper.readTree(json.toString());
-        JsonNode ticketsNode = jsonNode.get("tickets");
-        System.out.println(ticketsNode);
-
-        Ticket[] tickets = mapper.readValue(ticketsNode.toString(), new TypeReference<>() {
-        });
-
-        System.out.println(Arrays.toString(tickets));
+        return mapper;
     }
 }
