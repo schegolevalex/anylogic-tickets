@@ -7,6 +7,7 @@
     <list default="true" id="33e4ae9e-632a-4866-a4b7-915db78503b2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/schegolevalex/testTasks/AnylogicTickets.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/schegolevalex/testTasks/AnylogicTickets.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,7 +103,7 @@
       <updated>1682581636339</updated>
       <workItem from="1682581637596" duration="7949000" />
       <workItem from="1682771649111" duration="15714000" />
-      <workItem from="1682867383431" duration="8024000" />
+      <workItem from="1682867383431" duration="9792000" />
     </task>
     <servers />
   </component>
